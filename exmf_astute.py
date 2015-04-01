@@ -8,20 +8,16 @@ import sys
 from subprocess import Popen, PIPE
 
 yaml_file='/etc/astute.yaml'
-puppet_debug_opt='-d -v'
-puppet_tags_opt='--tags=nova_config,nova_paste_api_ini'
+puppet_debug_opt='-d -v -l /tmp/test.log'
+puppet_tags_opt='--tags=nova_config,nova_paste_api_ini,neutron_config,neutron_api_config,neutron_dhcp_agent_config,neutron_fwaas_service_config,neutron_l3_agent_config,neutron_lbaas_agent_config,neutron_metadata_agent_config,neutron_metering_agent_config,neutron_plugin_cisco,neutron_plugin_cisco_credentials,neutron_plugin_cisco_db_conn,neutron_plugin_cisco_l2network,neutron_plugin_linuxbridge,neutron_plugin_ml2,neutron_plugin_nvp,neutron_plugin_ovs,neutron_vpnaas_agent_config'
 
-try:
-    opened_yaml_file = open(yaml_file, 'r')
-except e:
-    sys.exit(1)
-try:
-    astute_dic=yaml.safe_load(opened_yaml_file)
-except ScannerError:
-    print "Wrong file format, please check the content"
-    sys.exit(2)
 
-opened_yaml_file.close()
+with open(yaml_file, 'r') as opened_yaml_file:
+    try:
+        astute_dic=yaml.safe_load(opened_yaml_file)
+    except ScannerError:
+        print "Wrong .yaml file format, please check the content"
+        sys.exit(2)
 
 if len(astute_dic['tasks']) > 0:
     sorted_tasks_by_priority = sorted(astute_dic['tasks'], key=lambda k: k['priority'])
@@ -37,4 +33,5 @@ if len(astute_dic['tasks']) > 0:
 
         puppet_cmd = 'puppet apply %s %s --modulepath=%s %s' % (puppet_debug_opt, puppet_tags_opt, puppet_modules, puppet_manifest)
         
-        print subprocess.Popen(shlex.split(puppet_cmd), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        process = Popen(shlex.split(puppet_cmd), stdout=PIPE, stderr=PIPE)
+        stdout, stderr = process.communicate()
