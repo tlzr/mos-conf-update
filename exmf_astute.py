@@ -3,7 +3,6 @@
 import operator
 import yaml
 import shlex
-#import subprocess
 import sys
 
 from subprocess import Popen, PIPE
@@ -26,10 +25,6 @@ opened_yaml_file.close()
 
 if len(astute_dic['tasks']) > 0:
     sorted_tasks_by_priority = sorted(astute_dic['tasks'], key=lambda k: k['priority'])
-# newlist = sorted(list_to_be_sorted, key=lambda k: k['name'])
-# from operator import itemgetter
-# newlist = sorted(list_to_be_sorted, key=itemgetter('name'))
-# newlist = sorted(l, key=itemgetter('name'), reverse=True)
     for i in sorted_tasks_by_priority:
         try:
             puppet_modules = i['parameters']['puppet_modules']
